@@ -8,5 +8,5 @@
 import Foundation
 
 protocol NetworkServiceProtocol {
-    
+    func requestForecast() async throws -> [Weather]
 }

@@ -8,5 +8,7 @@
 import Foundation
 
 protocol WeatherModelProtocol {
+    var weather: [Weather] { get }
     
+    func updateWeather() async throws
 }

@@ -18,7 +18,8 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     ) {
         guard let scene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: scene)
-        window?.rootViewController = CurrentWeatherVC(model: OpenWeatherModel())
+        let model = OpenWeatherModel(networkService: OpenWeatherNetworkService())
+        window?.rootViewController = CurrentWeatherVC(model: model)
         window?.makeKeyAndVisible()
     }
 

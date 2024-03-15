@@ -17,6 +17,8 @@ final class CurrentWeatherVC: UIViewController {
     init(model: WeatherModelProtocol) {
         self.model = model
         super.init(nibName: nil, bundle: nil)
+        updateWeather()
+        
     }
     
     required init?(coder: NSCoder) {
@@ -31,6 +33,17 @@ final class CurrentWeatherVC: UIViewController {
         super.viewDidLoad()
     }
 
-
+    // MARK: Updating data
+    func updateWeather() {
+        Task(priority: .medium) {
+            do {
+                try await model.updateWeather()
+                guard let weather = model.weather.first else { return }
+                currentWeatherView.setWeather(weather: weather)
+            } catch {
+                print(error)
+            }
+        }
+    }
 }
 
