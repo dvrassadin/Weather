@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import OSLog
+import CoreLocation
 
 final class OpenWeatherModel: WeatherModelProtocol {
     
@@ -13,21 +15,51 @@ final class OpenWeatherModel: WeatherModelProtocol {
     private let networkService: NetworkServiceProtocol
     private(set) var weather: [Weather] = []
     private let imageCache = NSCache<NSString, UIImage>()
+    private let geocoder = CLGeocoder()
+    private let locationKey = "location"
+    private(set) var location: String {
+        didSet {
+            UserDefaults.standard.setValue(location, forKey: locationKey)
+            UserDefaults.standard.synchronize()
+            logger.info("Set value \(self.location) to UserDefaults for key \(self.locationKey)")
+        }
+    }
+    private let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "",
+        category: "\(#fileID)"
+    )
     
     // MARK: Lifecycle
     init(networkService: NetworkServiceProtocol) {
         self.networkService = networkService
+        if let location = UserDefaults.standard.string(forKey: locationKey) {
+            self.location = location
+            logger.info("Reseived location from UserDefaults: \(location)")
+        } else {
+            location = "New York"
+        }
     }
     
     // MARK: Updating data
-    func updateWeather() async throws {
-        weather = try await networkService.requestForecast(latitude: 42.85572, longitude: 74.60116)
+    func updateWeather(location: String) async throws {
+        let placemark = try await geocoder.geocodeAddressString(location)
+        
+        guard let placemark = placemark.first,
+              let name = placemark.name,
+              let coordinate = placemark.location?.coordinate
+        else { throw APIError.invalidLocation }
+        
+        weather = try await networkService.requestForecast(
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude
+        )
+        self.location = name
     }
     
     func getWeatherIcon(at index: Int) async throws -> UIImage? {
         guard let iconName = weather[index].iconName else { return nil }
         if let image = imageCache.object(forKey: iconName as NSString) {
-            print("Using cache for image \(iconName)")
+            logger.info("Received image from cache: \(iconName)")
             return image
         } else {
             let imageData = try await networkService.requestWeatherIconData(iconName: iconName)

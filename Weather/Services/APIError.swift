@@ -14,4 +14,5 @@ enum APIError: Error {
     case unexpectedStatusCode
     case decodingError
     case emptyData
+    case invalidLocation
 }

@@ -9,7 +9,8 @@ import UIKit
 
 protocol WeatherModelProtocol {
     var weather: [Weather] { get }
+    var location: String { get }
     
-    func updateWeather() async throws
+    func updateWeather(location: String) async throws
     func getWeatherIcon(at index: Int) async throws -> UIImage?
 }

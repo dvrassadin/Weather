@@ -7,6 +7,7 @@
 
 import UIKit
 
+// MARK: - CurrentWeatherVC
 final class CurrentWeatherVC: UIViewController {
     
     // MARK: Properties
@@ -17,6 +18,7 @@ final class CurrentWeatherVC: UIViewController {
     init(model: WeatherModelProtocol) {
         self.model = model
         super.init(nibName: nil, bundle: nil)
+        currentWeatherView.delegate = self
     }
     
     required init?(coder: NSCoder) {
@@ -29,16 +31,16 @@ final class CurrentWeatherVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        updateWeather()
+        updateWeather(locationName: model.location)
     }
 
     // MARK: Updating data
-    func updateWeather() {
+    func updateWeather(locationName: String) {
         Task(priority: .medium) {
             do {
-                try await model.updateWeather()
+                try await model.updateWeather(location: locationName)
                 guard let weather = model.weather.first else { return }
-                currentWeatherView.setWeather(weather: weather)
+                currentWeatherView.setWeather(weather: weather, cityName: model.location)
                 guard let image = try await model.getWeatherIcon(at: 0) else { return }
                 currentWeatherView.setWeatherImage(image)
             } catch {
@@ -48,3 +50,9 @@ final class CurrentWeatherVC: UIViewController {
     }
 }
 
+// MARK: - CurrentWeatherViewDelegate
+extension CurrentWeatherVC: CurrentWeatherViewDelegate {
+    func updateLocation(_ location: String) {
+        updateWeather(locationName: location)
+    }
+}
