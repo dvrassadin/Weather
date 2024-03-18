@@ -5,7 +5,7 @@
 //  Created by Daniil Rassadin on 14/3/24.
 //
 
-import Foundation
+import OSLog
 
 final class OpenWeatherNetworkService: NetworkServiceProtocol {
     
@@ -23,35 +23,92 @@ final class OpenWeatherNetworkService: NetworkServiceProtocol {
         return decoder
     }()
     
-    private let baseURL = "https://api.openweathermap.org/data/2.5"
+    private let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "",
+        category: "\(#fileID)"
+    )
+    
+    private let baseURL = "https://api.openweathermap.org"
     
     // MARK: Requests
-    func requestForecast() async throws -> [Weather] {
+    func requestForecast(latitude: Double, longitude: Double) async throws -> [Weather] {
         guard var urlComponents = URLComponents(string: baseURL) else {
+            logger.error("Invalid server URL: \(self.baseURL)")
             throw APIError.invalidServerURL
         }
         
-        urlComponents.path.append("/forecast")
+        urlComponents.path.append("/data/2.5/forecast")
         urlComponents.queryItems = [
-            URLQueryItem(name: "lat", value: "42,85572"),
-            URLQueryItem(name: "lon", value: "74,60116"),
+            URLQueryItem(name: "lat", value: String(latitude)),
+            URLQueryItem(name: "lon", value: String(longitude)),
             URLQueryItem(name: "units", value: "metric"),
             URLQueryItem(name: "appid", value: apiKey)
         ]
-        guard let url = urlComponents.url else { throw APIError.invalidAPIEndpoint }
+        guard let url = urlComponents.url else {
+            logger.error("Invalid API endpoint: \(urlComponents)")
+            throw APIError.invalidAPIEndpoint
+        }
         
+        logger.info("Starting request: \(url.absoluteString)")
         let (data, response) = try await session.data(from: url)
         
         guard let httpResponse = response as? HTTPURLResponse else {
+            logger.error("API response is not HTTP response")
             throw APIError.notHTTPResponse
         }
         
-        guard httpResponse.statusCode == 200 else { throw APIError.unexpectedStatusCode }
+        guard httpResponse.statusCode == 200 else {
+            logger.error("Unexpected status code: \(httpResponse.statusCode)")
+            throw APIError.unexpectedStatusCode
+        }
         
         do {
-            return try decoder.decode(WeatherResponse.self, from: data).list
+            let weather = try decoder.decode(WeatherResponse.self, from: data).list
+            guard !weather.isEmpty else {
+                logger.notice("Empty data received for latitude and longitude: \(latitude), \(longitude)")
+                throw APIError.emptyData
+            }
+            logger.info("Received \(weather.count) weather items for request: \(url.absoluteString)")
+            return weather
         } catch {
+            logger.error("Could not decode data for request: \(url.absoluteString)")
             throw APIError.decodingError
         }
+    }
+    
+    func requestWeatherIconData(iconName: String) async throws -> Data {
+        guard var urlComponents = URLComponents(string: "https://openweathermap.org/img/wn") else {
+            logger.error("Invalid server URL: \(self.baseURL)")
+            throw APIError.invalidServerURL
+        }
+        
+        urlComponents.path.append("/\(iconName)@4x.png")
+        guard let url = urlComponents.url else {
+            logger.error("Invalid API endpoint: \(urlComponents)")
+            throw APIError.invalidAPIEndpoint
+        }
+        
+        let request = URLRequest(url: url, cachePolicy: .returnCacheDataElseLoad)
+        
+        logger.info("Starting request: \(url.absoluteString)")
+        let (data, response) = try await session.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            logger.error("API response is not HTTP response")
+            throw APIError.notHTTPResponse
+        }
+        
+        guard httpResponse.statusCode == 200 else {
+            logger.error("Unexpected status code: \(httpResponse.statusCode)")
+            throw APIError.unexpectedStatusCode
+        }
+        
+        guard !data.isEmpty else {
+            logger.notice("Empty data received")
+            throw APIError.emptyData
+        }
+        
+        logger.info("Received image data for request: \(request)")
+        return data
     }
 }

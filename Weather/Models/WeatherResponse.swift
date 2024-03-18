@@ -5,7 +5,7 @@
 //  Created by Daniil Rassadin on 14/3/24.
 //
 
-import Foundation
+import UIKit
 
 struct WeatherResponse: Decodable {
     let list: [Weather]
@@ -16,8 +16,8 @@ struct Weather: Decodable {
     var temperature: Double { main.temp }
     var feelsLike: Double { main.feelsLike }
     var description: String? { weather.first?.description }
-    var iconString: String? { weather.first?.icon }
     var windSpeed: Double { wind.speed }
+    var iconName: String? { weather.first?.icon }
     
     private enum CodingKeys: String, CodingKey {
         case date = "dt"

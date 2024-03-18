@@ -13,4 +13,5 @@ enum APIError: Error {
     case notHTTPResponse
     case unexpectedStatusCode
     case decodingError
+    case emptyData
 }

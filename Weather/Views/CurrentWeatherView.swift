@@ -13,14 +13,13 @@ final class CurrentWeatherView: UIView {
     private let descriptionLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Cloudy"
         label.font = UIFont(name: "Inter-Regular_Medium", size: 24)
         label.textColor = .white
         return label
     }()
     
     private let imageView: UIImageView = {
-        let imageView = UIImageView(image: UIImage(systemName: "cloud.fill"))
+        let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit
         return imageView
@@ -31,7 +30,6 @@ final class CurrentWeatherView: UIView {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont(name: "Inter-Regular_Medium", size: 64)
         label.textColor = .white
-        label.text = "26°C"
         return label
     }()
     
@@ -40,7 +38,6 @@ final class CurrentWeatherView: UIView {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont(name: "Inter-Regular_Regular", size: 18)
         label.textColor = .white
-        label.text = "Sunday | 12 Dec 2023"
         return label
     }()
     
@@ -57,12 +54,6 @@ final class CurrentWeatherView: UIView {
     // MARK: Lifecycle
     override func layoutSubviews() {
         setupUI()
-//        UIFont.familyNames.forEach { family in
-//            print(family)
-//            UIFont.fontNames(forFamilyName: family).forEach { name in
-//                print(" ", name)
-//            }
-//        }
     }
     
     // MARK: Setup UI
@@ -96,5 +87,9 @@ final class CurrentWeatherView: UIView {
         let day = weather.date.formatted(.dateTime.weekday(.wide))
         let date = weather.date.formatted(.dateTime.day().month().year())
         dateLabel.text = "\(day) | \(date)"
+    }
+    
+    func setWeatherImage(_ image: UIImage) {
+        imageView.image = image
     }
 }

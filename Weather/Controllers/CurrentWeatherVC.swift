@@ -17,8 +17,6 @@ final class CurrentWeatherVC: UIViewController {
     init(model: WeatherModelProtocol) {
         self.model = model
         super.init(nibName: nil, bundle: nil)
-        updateWeather()
-        
     }
     
     required init?(coder: NSCoder) {
@@ -31,6 +29,7 @@ final class CurrentWeatherVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateWeather()
     }
 
     // MARK: Updating data
@@ -40,6 +39,8 @@ final class CurrentWeatherVC: UIViewController {
                 try await model.updateWeather()
                 guard let weather = model.weather.first else { return }
                 currentWeatherView.setWeather(weather: weather)
+                guard let image = try await model.getWeatherIcon(at: 0) else { return }
+                currentWeatherView.setWeatherImage(image)
             } catch {
                 print(error)
             }
