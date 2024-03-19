@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 
 // MARK: - CurrentWeatherView
 final class CurrentWeatherView: UIView {
@@ -50,8 +51,8 @@ final class CurrentWeatherView: UIView {
     private let locationSearchBar: UISearchBar = {
         let searchBar = UISearchBar()
         searchBar.translatesAutoresizingMaskIntoConstraints = false
-        searchBar.placeholder = "Enter a City"
-        searchBar.barTintColor = .customBackground
+        searchBar.placeholder = String(localized: "Enter a City")
+        searchBar.barTintColor = .customBackground2
         searchBar.searchBarStyle = .minimal
         searchBar.searchTextField.textColor = .white
         searchBar.setImage(UIImage(), for: .search, state: .normal)
@@ -96,10 +97,12 @@ final class CurrentWeatherView: UIView {
         let stackView = UIStackView()
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
-        stackView.spacing = 10
+        stackView.spacing = 5
         stackView.alignment = .center
         return stackView
     }()
+    
+    private let chartView = ChartView()
     
     // MARK: Lifecycle
     override func layoutSubviews() {
@@ -109,7 +112,7 @@ final class CurrentWeatherView: UIView {
     
     // MARK: Setup UI
     private func setupUI() {
-        backgroundColor = .customBackground
+        backgroundColor = .customBackground1
         addSubviews()
         setupConstraints()
         chevronButton.addTarget(
@@ -130,9 +133,12 @@ final class CurrentWeatherView: UIView {
         currentWeatherStackView.addArrangedSubview(degreesLabel)
         currentWeatherStackView.addArrangedSubview(dateLabel)
         addSubview(currentWeatherStackView)
+        addSubview(chartView)
     }
     
     private func setupConstraints() {
+        chartView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             cityStackView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 20),
             cityStackView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 33),
@@ -143,36 +149,53 @@ final class CurrentWeatherView: UIView {
             locationSearchBar.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.9),
             locationSearchBar.heightAnchor.constraint(equalTo: cityStackView.heightAnchor),
             
-            currentWeatherStackView.topAnchor.constraint(equalTo: locationSearchBar.bottomAnchor, constant: 75),
+            currentWeatherStackView.topAnchor.constraint(equalTo: locationSearchBar.bottomAnchor, constant: 50),
             currentWeatherStackView.centerXAnchor.constraint(equalTo: centerXAnchor),
             
             weatherIconImageView.widthAnchor.constraint(equalTo: safeAreaLayoutGuide.widthAnchor, multiplier: 0.35),
-            weatherIconImageView.heightAnchor.constraint(equalTo: weatherIconImageView.widthAnchor)
+            weatherIconImageView.heightAnchor.constraint(equalTo: weatherIconImageView.widthAnchor),
+            
+            chartView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            chartView.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.888),
+            chartView.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 0.305),
+            chartView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor)
         ])
     }
     
-    func setWeather(weather: Weather, cityName: String) {
-        cityNameLabel.text = cityName
+    func setWeather(weather: [Weather], location: String) {
+        guard let firstWeather = weather.first else { return }
+        
+        setMainWeather(firstWeather, location: location)
+        
+        let todayForecast = weather.prefix(while: { weatherItem in
+            Calendar.current.isDate(firstWeather.date, inSameDayAs: weatherItem.date)
+        })
+        dump(todayForecast)
+        chartView.setChart(weather: Array(todayForecast))
+        
+        locationSearchBar.fadeOut(withDuration: 0.15)
+        locationSearchBar.resignFirstResponder()
+    }
+    
+    private func setMainWeather(_ weather: Weather, location: String) {
+        cityNameLabel.text = location
         descriptionLabel.text = weather.description?.capitalized
         degreesLabel.text = "\(Int(weather.temperature.rounded()))°C"
         let day = weather.date.formatted(.dateTime.weekday(.wide))
         let date = weather.date.formatted(.dateTime.day().month().year())
         dateLabel.text = "\(day) | \(date)"
-        locationSearchBar.fadeOut(withDuration: 0.2)
-        locationSearchBar.resignFirstResponder()
-    }
-    
-    func setWeatherImage(_ image: UIImage) {
-        weatherIconImageView.image = image
+        Task(priority: .medium) {
+            weatherIconImageView.image = await delegate?.getIcon(at: 1)
+        }
     }
     
     // MARK: User interaction
     @objc private func toggleLocationSearchBar() {
         if locationSearchBar.isHidden {
-            locationSearchBar.fadeIn(withDuration: 0.2)
+            locationSearchBar.fadeIn(withDuration: 0.15)
             locationSearchBar.becomeFirstResponder()
         } else {
-            locationSearchBar.fadeOut(withDuration: 0.2)
+            locationSearchBar.fadeOut(withDuration: 0.15)
             locationSearchBar.resignFirstResponder()
         }
     }
@@ -180,7 +203,7 @@ final class CurrentWeatherView: UIView {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         if touch.phase == .began {
-            locationSearchBar.fadeOut(withDuration: 0.2)
+            locationSearchBar.fadeOut(withDuration: 0.15)
             endEditing(true)
         }
     }

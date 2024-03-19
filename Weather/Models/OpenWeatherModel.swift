@@ -21,7 +21,7 @@ final class OpenWeatherModel: WeatherModelProtocol {
         didSet {
             UserDefaults.standard.setValue(location, forKey: locationKey)
             UserDefaults.standard.synchronize()
-            logger.info("Set value \(self.location) to UserDefaults for key \(self.locationKey)")
+            logger.info("Set value \(self.location) to UserDefaults for key \"\(self.locationKey)\"")
         }
     }
     private let logger = Logger(
@@ -34,7 +34,7 @@ final class OpenWeatherModel: WeatherModelProtocol {
         self.networkService = networkService
         if let location = UserDefaults.standard.string(forKey: locationKey) {
             self.location = location
-            logger.info("Reseived location from UserDefaults: \(location)")
+            logger.info("Received location from UserDefaults: \(location)")
         } else {
             location = "New York"
         }
@@ -56,14 +56,14 @@ final class OpenWeatherModel: WeatherModelProtocol {
         self.location = name
     }
     
-    func getWeatherIcon(at index: Int) async throws -> UIImage? {
+    func getWeatherIcon(at index: Int) async -> UIImage? {
         guard let iconName = weather[index].iconName else { return nil }
         if let image = imageCache.object(forKey: iconName as NSString) {
             logger.info("Received image from cache: \(iconName)")
             return image
         } else {
-            let imageData = try await networkService.requestWeatherIconData(iconName: iconName)
-            guard let image = UIImage(data: imageData) else { return nil }
+            guard let imageData = await networkService.requestWeatherIconData(iconName: iconName),
+                  let image = UIImage(data: imageData) else { return nil }
             imageCache.setObject(image, forKey: iconName as NSString)
             return image
         }

@@ -12,5 +12,5 @@ protocol WeatherModelProtocol {
     var location: String { get }
     
     func updateWeather(location: String) async throws
-    func getWeatherIcon(at index: Int) async throws -> UIImage?
+    func getWeatherIcon(at index: Int) async -> UIImage?
 }

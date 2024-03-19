@@ -29,8 +29,8 @@ final class CurrentWeatherVC: UIViewController {
         view = currentWeatherView
     }
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         updateWeather(locationName: model.location)
     }
 
@@ -39,10 +39,7 @@ final class CurrentWeatherVC: UIViewController {
         Task(priority: .medium) {
             do {
                 try await model.updateWeather(location: locationName)
-                guard let weather = model.weather.first else { return }
-                currentWeatherView.setWeather(weather: weather, cityName: model.location)
-                guard let image = try await model.getWeatherIcon(at: 0) else { return }
-                currentWeatherView.setWeatherImage(image)
+                currentWeatherView.setWeather(weather: model.weather, location: model.location)
             } catch {
                 print(error)
             }
@@ -54,5 +51,9 @@ final class CurrentWeatherVC: UIViewController {
 extension CurrentWeatherVC: CurrentWeatherViewDelegate {
     func updateLocation(_ location: String) {
         updateWeather(locationName: location)
+    }
+    
+    func getIcon(at index: Int) async -> UIImage? {
+        return await model.getWeatherIcon(at: index)
     }
 }

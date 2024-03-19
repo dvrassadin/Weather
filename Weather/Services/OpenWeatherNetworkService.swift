@@ -76,39 +76,44 @@ final class OpenWeatherNetworkService: NetworkServiceProtocol {
         }
     }
     
-    func requestWeatherIconData(iconName: String) async throws -> Data {
+    func requestWeatherIconData(iconName: String) async -> Data? {
         guard var urlComponents = URLComponents(string: "https://openweathermap.org/img/wn") else {
             logger.error("Invalid server URL: \(self.baseURL)")
-            throw APIError.invalidServerURL
+            return nil
         }
         
         urlComponents.path.append("/\(iconName)@4x.png")
         guard let url = urlComponents.url else {
             logger.error("Invalid API endpoint: \(urlComponents)")
-            throw APIError.invalidAPIEndpoint
+            return nil
         }
         
         let request = URLRequest(url: url, cachePolicy: .returnCacheDataElseLoad)
         
         logger.info("Starting request: \(url.absoluteString)")
-        let (data, response) = try await session.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse else {
-            logger.error("API response is not HTTP response")
-            throw APIError.notHTTPResponse
+        do {
+            let (data, response) = try await session.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                logger.error("API response is not HTTP response")
+                return nil
+            }
+            
+            guard httpResponse.statusCode == 200 else {
+                logger.error("Unexpected status code: \(httpResponse.statusCode)")
+                return nil
+            }
+            
+            guard !data.isEmpty else {
+                logger.notice("Empty data received")
+                return nil
+            }
+            
+            logger.info("Received image data for request: \(request)")
+            return data
+        } catch {
+            logger.error("\(error)")
+            return nil
         }
-        
-        guard httpResponse.statusCode == 200 else {
-            logger.error("Unexpected status code: \(httpResponse.statusCode)")
-            throw APIError.unexpectedStatusCode
-        }
-        
-        guard !data.isEmpty else {
-            logger.notice("Empty data received")
-            throw APIError.emptyData
-        }
-        
-        logger.info("Received image data for request: \(request)")
-        return data
     }
 }

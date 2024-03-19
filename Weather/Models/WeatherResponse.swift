@@ -5,7 +5,7 @@
 //  Created by Daniil Rassadin on 14/3/24.
 //
 
-import UIKit
+import Foundation
 
 struct WeatherResponse: Decodable {
     let list: [Weather]

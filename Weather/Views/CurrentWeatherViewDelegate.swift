@@ -5,8 +5,9 @@
 //  Created by Daniil Rassadin on 18/3/24.
 //
 
-import Foundation
+import UIKit
 
 protocol CurrentWeatherViewDelegate: AnyObject {
     func updateLocation(_ location: String)
+    func getIcon(at index: Int) async -> UIImage?
 }
