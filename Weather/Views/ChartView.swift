@@ -87,15 +87,9 @@ final class ChartView: UIView {
     }
     
     func setChart(weather: [Weather]) {
-//        guard let minTemperature = weather.min(by: { $0.temperature < $1.temperature})?.temperature,
-//              let maxTemperature = weather.min(by: { $0.temperature > $1.temperature})?.temperature
-//        else { return }
-//        print("min - ", minTemperature)
-//        print("max - ", maxTemperature)
         let values = weather.map {
             ChartDataEntry(x: Double($0.date.timeIntervalSince1970), y: $0.temperature)
         }
-//        print(values.count)
         let chartDataSet = LineChartDataSet(entries: values)
         chartDataSet.mode = .horizontalBezier
         chartDataSet.drawCirclesEnabled = false

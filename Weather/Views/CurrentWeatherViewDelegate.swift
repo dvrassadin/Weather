@@ -9,5 +9,5 @@ import UIKit
 
 protocol CurrentWeatherViewDelegate: AnyObject {
     func updateLocation(_ location: String)
-    func getIcon(at index: Int) async -> UIImage?
+    func getIcon(name: String) async -> UIImage?
 }

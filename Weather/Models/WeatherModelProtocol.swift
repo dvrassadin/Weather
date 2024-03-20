@@ -8,9 +8,11 @@
 import UIKit
 
 protocol WeatherModelProtocol {
-    var weather: [Weather] { get }
+    
+    var weatherByDays: [[Weather]] { get }
     var location: String { get }
     
     func updateWeather(location: String) async throws
-    func getWeatherIcon(at index: Int) async -> UIImage?
+    func getWeatherIcon(name: String) async -> UIImage?
+    
 }

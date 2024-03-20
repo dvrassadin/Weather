@@ -13,7 +13,7 @@ final class OpenWeatherModel: WeatherModelProtocol {
     
     // MARK: Properties
     private let networkService: NetworkServiceProtocol
-    private(set) var weather: [Weather] = []
+    private(set) var weatherByDays: [[Weather]] = []
     private let imageCache = NSCache<NSString, UIImage>()
     private let geocoder = CLGeocoder()
     private let locationKey = "location"
@@ -49,23 +49,28 @@ final class OpenWeatherModel: WeatherModelProtocol {
               let coordinate = placemark.location?.coordinate
         else { throw APIError.invalidLocation }
         
-        weather = try await networkService.requestForecast(
+        let weather = try await networkService.requestForecast(
             latitude: coordinate.latitude,
             longitude: coordinate.longitude
         )
+        
+        weatherByDays = Dictionary(grouping: weather) {$0.date.formatted(.dateTime.day()) }
+            .sorted { $0.key < $1.key }
+            .map { $0.value }
+        
         self.location = name
     }
     
-    func getWeatherIcon(at index: Int) async -> UIImage? {
-        guard let iconName = weather[index].iconName else { return nil }
-        if let image = imageCache.object(forKey: iconName as NSString) {
-            logger.info("Received image from cache: \(iconName)")
+    func getWeatherIcon(name: String) async -> UIImage? {
+        if let image = imageCache.object(forKey: name as NSString) {
+            logger.info("Received image from cache: \(name)")
             return image
         } else {
-            guard let imageData = await networkService.requestWeatherIconData(iconName: iconName),
+            guard let imageData = await networkService.requestWeatherIconData(iconName: name),
                   let image = UIImage(data: imageData) else { return nil }
-            imageCache.setObject(image, forKey: iconName as NSString)
+            imageCache.setObject(image, forKey: name as NSString)
             return image
         }
     }
+    
 }

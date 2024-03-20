@@ -97,14 +97,37 @@ final class CurrentWeatherView: UIView {
         let stackView = UIStackView()
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
-        stackView.spacing = 5
+        stackView.spacing = 3
         stackView.alignment = .center
         return stackView
+    }()
+    
+    let forecastCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.backgroundColor = .clear
+        return collectionView
     }()
     
     private let chartView = ChartView()
     
     // MARK: Lifecycle
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        forecastCollectionView.register(
+            ForecastCollectionViewCell.self,
+            forCellWithReuseIdentifier: ForecastCollectionViewCell.identifier
+        )
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func layoutSubviews() {
         setupUI()
         locationSearchBar.delegate = self
@@ -133,6 +156,7 @@ final class CurrentWeatherView: UIView {
         currentWeatherStackView.addArrangedSubview(degreesLabel)
         currentWeatherStackView.addArrangedSubview(dateLabel)
         addSubview(currentWeatherStackView)
+        addSubview(forecastCollectionView)
         addSubview(chartView)
     }
     
@@ -149,11 +173,16 @@ final class CurrentWeatherView: UIView {
             locationSearchBar.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.9),
             locationSearchBar.heightAnchor.constraint(equalTo: cityStackView.heightAnchor),
             
-            currentWeatherStackView.topAnchor.constraint(equalTo: locationSearchBar.bottomAnchor, constant: 50),
+            currentWeatherStackView.topAnchor.constraint(equalTo: locationSearchBar.bottomAnchor, constant: 30),
             currentWeatherStackView.centerXAnchor.constraint(equalTo: centerXAnchor),
             
             weatherIconImageView.widthAnchor.constraint(equalTo: safeAreaLayoutGuide.widthAnchor, multiplier: 0.35),
             weatherIconImageView.heightAnchor.constraint(equalTo: weatherIconImageView.widthAnchor),
+            
+            forecastCollectionView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            forecastCollectionView.heightAnchor.constraint(greaterThanOrEqualToConstant: 64),
+            forecastCollectionView.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.849),
+            forecastCollectionView.bottomAnchor.constraint(equalTo: chartView.topAnchor, constant: -10),
             
             chartView.centerXAnchor.constraint(equalTo: centerXAnchor),
             chartView.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.888),
@@ -167,11 +196,7 @@ final class CurrentWeatherView: UIView {
         
         setMainWeather(firstWeather, location: location)
         
-        let todayForecast = weather.prefix(while: { weatherItem in
-            Calendar.current.isDate(firstWeather.date, inSameDayAs: weatherItem.date)
-        })
-        dump(todayForecast)
-        chartView.setChart(weather: Array(todayForecast))
+        chartView.setChart(weather: weather)
         
         locationSearchBar.fadeOut(withDuration: 0.15)
         locationSearchBar.resignFirstResponder()
@@ -184,8 +209,9 @@ final class CurrentWeatherView: UIView {
         let day = weather.date.formatted(.dateTime.weekday(.wide))
         let date = weather.date.formatted(.dateTime.day().month().year())
         dateLabel.text = "\(day) | \(date)"
+        guard let iconName = weather.iconName else { return }
         Task(priority: .medium) {
-            weatherIconImageView.image = await delegate?.getIcon(at: 1)
+            weatherIconImageView.image = await delegate?.getIcon(name: iconName)
         }
     }
     
@@ -211,9 +237,11 @@ final class CurrentWeatherView: UIView {
 
 // MARK: - SearchBarDelegate
 extension CurrentWeatherView: UISearchBarDelegate {
+    
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         guard let text = searchBar.text else { return }
         delegate?.updateLocation(text)
         searchBar.text = nil
     }
+    
 }

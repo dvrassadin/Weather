@@ -8,6 +8,7 @@
 import UIKit
 
 extension UIView {
+    
     func fadeIn(withDuration: TimeInterval) {
         self.alpha = 0
         self.isHidden = false
@@ -23,4 +24,5 @@ extension UIView {
         }
 
     }
+    
 }
