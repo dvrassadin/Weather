@@ -9,8 +9,10 @@
 /* Begin PBXBuildFile section */
 		5115F9142BA957A80050F22D /* ChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5115F9132BA957A80050F22D /* ChartView.swift */; };
 		5115F9172BA984CE0050F22D /* DGCharts in Frameworks */ = {isa = PBXBuildFile; productRef = 5115F9162BA984CE0050F22D /* DGCharts */; };
-		5115F91C2BA9AE5A0050F22D /* IntValueFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5115F91B2BA9AE5A0050F22D /* IntValueFormatter.swift */; };
+		5115F91C2BA9AE5A0050F22D /* DegreesValueFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5115F91B2BA9AE5A0050F22D /* DegreesValueFormatter.swift */; };
 		5115F91E2BAAB6520050F22D /* ForecastCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5115F91D2BAAB6520050F22D /* ForecastCollectionViewCell.swift */; };
+		5115F9222BAC67190050F22D /* ForecastCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5115F9212BAC67190050F22D /* ForecastCollectionView.swift */; };
+		5115F9242BAC69890050F22D /* DetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5115F9232BAC69890050F22D /* DetailsView.swift */; };
 		513282C42BA41491004158F1 /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 513282C32BA41491004158F1 /* APIError.swift */; };
 		5164674C2BA2F64100B3C7E3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5164674B2BA2F64100B3C7E3 /* AppDelegate.swift */; };
 		5164674E2BA2F64100B3C7E3 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5164674D2BA2F64100B3C7E3 /* SceneDelegate.swift */; };
@@ -26,14 +28,19 @@
 		516467712BA300A300B3C7E3 /* APIKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 516467702BA300A300B3C7E3 /* APIKey.swift */; };
 		516467742BA3082800B3C7E3 /* Inter-VariableFont.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 516467732BA3082800B3C7E3 /* Inter-VariableFont.ttf */; };
 		516467762BA33E0100B3C7E3 /* WeatherResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 516467752BA33E0100B3C7E3 /* WeatherResponse.swift */; };
+		51B931612BB1517300F077D7 /* ChartViewDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B931602BB1517300F077D7 /* ChartViewDelegate.swift */; };
+		51B931632BB17CB300F077D7 /* UIImage+Resize.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51B931622BB17CB300F077D7 /* UIImage+Resize.swift */; };
 		51BB8E3C2BA859540058D09F /* UIView+Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51BB8E3B2BA859540058D09F /* UIView+Animation.swift */; };
 		51BB8E3E2BA85B180058D09F /* CurrentWeatherViewDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51BB8E3D2BA85B180058D09F /* CurrentWeatherViewDelegate.swift */; };
+		51CE482B2BAD6C3A006FB320 /* DetailItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CE482A2BAD6C3A006FB320 /* DetailItemView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		5115F9132BA957A80050F22D /* ChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartView.swift; sourceTree = "<group>"; };
-		5115F91B2BA9AE5A0050F22D /* IntValueFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntValueFormatter.swift; sourceTree = "<group>"; };
+		5115F91B2BA9AE5A0050F22D /* DegreesValueFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DegreesValueFormatter.swift; sourceTree = "<group>"; };
 		5115F91D2BAAB6520050F22D /* ForecastCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastCollectionViewCell.swift; sourceTree = "<group>"; };
+		5115F9212BAC67190050F22D /* ForecastCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastCollectionView.swift; sourceTree = "<group>"; };
+		5115F9232BAC69890050F22D /* DetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsView.swift; sourceTree = "<group>"; };
 		513282C32BA41491004158F1 /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
 		516467482BA2F64100B3C7E3 /* Weather.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Weather.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5164674B2BA2F64100B3C7E3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -51,8 +58,11 @@
 		516467702BA300A300B3C7E3 /* APIKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKey.swift; sourceTree = "<group>"; };
 		516467732BA3082800B3C7E3 /* Inter-VariableFont.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-VariableFont.ttf"; sourceTree = "<group>"; };
 		516467752BA33E0100B3C7E3 /* WeatherResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherResponse.swift; sourceTree = "<group>"; };
+		51B931602BB1517300F077D7 /* ChartViewDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartViewDelegate.swift; sourceTree = "<group>"; };
+		51B931622BB17CB300F077D7 /* UIImage+Resize.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Resize.swift"; sourceTree = "<group>"; };
 		51BB8E3B2BA859540058D09F /* UIView+Animation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Animation.swift"; sourceTree = "<group>"; };
 		51BB8E3D2BA85B180058D09F /* CurrentWeatherViewDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentWeatherViewDelegate.swift; sourceTree = "<group>"; };
+		51CE482A2BAD6C3A006FB320 /* DetailItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailItemView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +77,25 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5115F91F2BAC66AD0050F22D /* ChartView */ = {
+			isa = PBXGroup;
+			children = (
+				5115F9132BA957A80050F22D /* ChartView.swift */,
+				5115F91B2BA9AE5A0050F22D /* DegreesValueFormatter.swift */,
+				51B931602BB1517300F077D7 /* ChartViewDelegate.swift */,
+			);
+			path = ChartView;
+			sourceTree = "<group>";
+		};
+		5115F9202BAC66C00050F22D /* ForecastColletionView */ = {
+			isa = PBXGroup;
+			children = (
+				5115F91D2BAAB6520050F22D /* ForecastCollectionViewCell.swift */,
+				5115F9212BAC67190050F22D /* ForecastCollectionView.swift */,
+			);
+			path = ForecastColletionView;
+			sourceTree = "<group>";
+		};
 		5164673F2BA2F64100B3C7E3 = {
 			isa = PBXGroup;
 			children = (
@@ -115,10 +144,10 @@
 			isa = PBXGroup;
 			children = (
 				516467662BA2FB3A00B3C7E3 /* CurrentWeatherView.swift */,
-				5115F9132BA957A80050F22D /* ChartView.swift */,
 				51BB8E3D2BA85B180058D09F /* CurrentWeatherViewDelegate.swift */,
-				5115F91B2BA9AE5A0050F22D /* IntValueFormatter.swift */,
-				5115F91D2BAAB6520050F22D /* ForecastCollectionViewCell.swift */,
+				5115F91F2BAC66AD0050F22D /* ChartView */,
+				5115F9202BAC66C00050F22D /* ForecastColletionView */,
+				51CE48252BAD5D30006FB320 /* DetailsView */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -163,8 +192,18 @@
 			isa = PBXGroup;
 			children = (
 				51BB8E3B2BA859540058D09F /* UIView+Animation.swift */,
+				51B931622BB17CB300F077D7 /* UIImage+Resize.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		51CE48252BAD5D30006FB320 /* DetailsView */ = {
+			isa = PBXGroup;
+			children = (
+				5115F9232BAC69890050F22D /* DetailsView.swift */,
+				51CE482A2BAD6C3A006FB320 /* DetailItemView.swift */,
+			);
+			path = DetailsView;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -246,15 +285,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				516467692BA2FC5F00B3C7E3 /* NetworkServiceProtocol.swift in Sources */,
-				5115F91C2BA9AE5A0050F22D /* IntValueFormatter.swift in Sources */,
+				5115F9222BAC67190050F22D /* ForecastCollectionView.swift in Sources */,
+				5115F91C2BA9AE5A0050F22D /* DegreesValueFormatter.swift in Sources */,
 				5115F91E2BAAB6520050F22D /* ForecastCollectionViewCell.swift in Sources */,
 				516467502BA2F64100B3C7E3 /* CurrentWeatherVC.swift in Sources */,
+				51CE482B2BAD6C3A006FB320 /* DetailItemView.swift in Sources */,
+				51B931612BB1517300F077D7 /* ChartViewDelegate.swift in Sources */,
 				516467672BA2FB3A00B3C7E3 /* CurrentWeatherView.swift in Sources */,
 				5115F9142BA957A80050F22D /* ChartView.swift in Sources */,
 				5164674C2BA2F64100B3C7E3 /* AppDelegate.swift in Sources */,
 				516467762BA33E0100B3C7E3 /* WeatherResponse.swift in Sources */,
 				51BB8E3C2BA859540058D09F /* UIView+Animation.swift in Sources */,
 				51BB8E3E2BA85B180058D09F /* CurrentWeatherViewDelegate.swift in Sources */,
+				5115F9242BAC69890050F22D /* DetailsView.swift in Sources */,
+				51B931632BB17CB300F077D7 /* UIImage+Resize.swift in Sources */,
 				5164676F2BA2FD8400B3C7E3 /* OpenWeatherModel.swift in Sources */,
 				5164674E2BA2F64100B3C7E3 /* SceneDelegate.swift in Sources */,
 				5164676D2BA2FD3B00B3C7E3 /* WeatherModelProtocol.swift in Sources */,
@@ -411,8 +455,8 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.weather";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -444,8 +488,8 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.weather";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

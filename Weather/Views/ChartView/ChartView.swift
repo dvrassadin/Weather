@@ -10,6 +10,9 @@ import DGCharts
 
 final class ChartView: UIView {
     
+    // MARK: Properties
+    weak var delegate: WeatherChartViewDelegate?
+    
     // MARK: UI components
     private let clockImageView: UIImageView = {
         let imageView = UIImageView(
@@ -31,7 +34,7 @@ final class ChartView: UIView {
         return label
     }()
     
-    private let chart: LineChartView = {
+    let chart: LineChartView = {
         let chart = LineChartView()
         chart.translatesAutoresizingMaskIntoConstraints = false
         chart.noDataTextColor = .white
@@ -49,17 +52,25 @@ final class ChartView: UIView {
         return chart
     }()
     
+    init() {
+        super.init(frame: .zero)
+        setupUI()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     // MARK: Lifecycle
     override func layoutSubviews() {
-        setupUI()
+        setupConstraints()
+        layer.cornerRadius = min(frame.height, frame.width) / 30
     }
 
     // MARK: Setup UI
     private func setupUI() {
         backgroundColor = .customBackground2
-        layer.cornerRadius = min(frame.height, frame.width) / 25
         addSubviews()
-        setupConstraints()
     }
     
     private func addSubviews() {
@@ -87,8 +98,9 @@ final class ChartView: UIView {
     }
     
     func setChart(weather: [Weather]) {
-        let values = weather.map {
-            ChartDataEntry(x: Double($0.date.timeIntervalSince1970), y: $0.temperature)
+        var values = [ChartDataEntry]()
+        weather.enumerated().forEach { index, item in
+            values.append(ChartDataEntry(x: Double(index), y: item.temperature))
         }
         let chartDataSet = LineChartDataSet(entries: values)
         chartDataSet.mode = .horizontalBezier
@@ -99,9 +111,20 @@ final class ChartView: UIView {
             chartDataSet.valueFont = font
         }
         chartDataSet.valueTextColor = .white
-        chartDataSet.valueFormatter = IntValueFormatter()
+        chartDataSet.valueFormatter = DegreesValueFormatter()
+        chartDataSet.iconsOffset = CGPoint(x: 0, y: 20)
         let chartData = LineChartData(dataSet: chartDataSet)
         chart.data = chartData
+        
+        weather.enumerated().forEach { index, item in
+            guard let iconName = item.iconName else { return }
+            Task(priority: .medium) {
+                guard let icon = await delegate?.getIcon(name: iconName)?.resize(40, 40)
+                else { return }
+                chart.data?.dataSet(at: 0)?.entriesForXValue(Double(index)).first?.icon = icon
+                chart.notifyDataSetChanged()
+            }
+        }
     }
     
 }

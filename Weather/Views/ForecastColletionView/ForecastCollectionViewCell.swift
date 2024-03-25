@@ -21,7 +21,7 @@ final class ForecastCollectionViewCell: UICollectionViewCell {
     private let dateLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = UIFont(name: "Inter-Regular_Regular", size: 14)
+        label.font = UIFont(name: "Inter-Regular", size: 10)
         label.textColor = .white
         label.textAlignment = .center
         label.layer.opacity = 0.6
@@ -51,17 +51,20 @@ final class ForecastCollectionViewCell: UICollectionViewCell {
         weatherImageView.image = nil
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        setupConstraints()
+    }
+    
     // MARK: Setup UI
     private func setupUI() {
         addSubview(dateLabel)
         addSubview(weatherImageView)
-        setupConstraints()
     }
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
             dateLabel.topAnchor.constraint(equalTo: contentView.topAnchor),
-            dateLabel.heightAnchor.constraint(equalToConstant: 25),
             dateLabel.widthAnchor.constraint(equalToConstant: 40),
             
             weatherImageView.topAnchor.constraint(equalTo: dateLabel.bottomAnchor),
@@ -83,7 +86,7 @@ final class ForecastCollectionViewCell: UICollectionViewCell {
         UIView.animate(withDuration: 0.2) {
             self.dateLabel.layer.opacity = self.isSelected ? 1 : 0.6
             self.weatherImageView.layer.opacity = self.isSelected ? 1 : 0.6
-            self.transform = self.isSelected ? CGAffineTransform(scaleX: 1.1, y: 1.2) : .identity
+            self.transform = self.isSelected ? CGAffineTransform(scaleX: 1.15, y: 1.2) : .identity
         }
     }
     

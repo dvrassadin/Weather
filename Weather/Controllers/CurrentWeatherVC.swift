@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import DGCharts
 
 // MARK: - CurrentWeatherVC
 final class CurrentWeatherVC: UIViewController {
@@ -13,7 +14,7 @@ final class CurrentWeatherVC: UIViewController {
     // MARK: Properties
     private let currentWeatherView = CurrentWeatherView()
     private let model: WeatherModelProtocol
-    private var selectedIndex = 0
+    private var selectedDayIndex = 0
 
     // MARK: Lifecycle
     init(model: WeatherModelProtocol) {
@@ -22,6 +23,7 @@ final class CurrentWeatherVC: UIViewController {
         currentWeatherView.delegate = self
         currentWeatherView.forecastCollectionView.dataSource = self
         currentWeatherView.forecastCollectionView.delegate = self
+        currentWeatherView.chartView.chart.delegate = self
     }
     
     required init?(coder: NSCoder) {
@@ -43,13 +45,13 @@ final class CurrentWeatherVC: UIViewController {
             do {
                 try await model.updateWeather(location: locationName)
                 currentWeatherView.setWeather(
-                    weather: model.weatherByDays[selectedIndex],
+                    weather: model.weatherByDays[selectedDayIndex],
                     location: model.location
                 )
-                selectedIndex = 0
+                selectedDayIndex = 0
                 currentWeatherView.forecastCollectionView.reloadData()
                 currentWeatherView.forecastCollectionView.selectItem(
-                    at: IndexPath(row: selectedIndex, section: 0),
+                    at: IndexPath(row: selectedDayIndex, section: 0),
                     animated: true,
                     scrollPosition: .centeredHorizontally
                 )
@@ -58,6 +60,12 @@ final class CurrentWeatherVC: UIViewController {
             }
         }
     }
+    
+    // TODO: Create alert
+    private func showAlert(title: String, text: String) {
+        
+    }
+    
 }
 
 // MARK: - CurrentWeatherViewDelegate
@@ -104,6 +112,7 @@ extension CurrentWeatherVC: UICollectionViewDataSource {
                 }
             }
         }
+        
         return cell
     }
     
@@ -113,11 +122,28 @@ extension CurrentWeatherVC: UICollectionViewDataSource {
 extension CurrentWeatherVC: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        selectedIndex = indexPath.row
+        selectedDayIndex = indexPath.row
         currentWeatherView.setWeather(
-            weather: model.weatherByDays[selectedIndex],
+            weather: model.weatherByDays[selectedDayIndex],
+            location: model.location
+        )
+    }
+
+}
+
+// MARK: - ChartViewDelegate
+extension CurrentWeatherVC: ChartViewDelegate {
+    
+    func chartValueSelected(
+        _ chartView: ChartViewBase,
+        entry: ChartDataEntry,
+        highlight: Highlight
+    ) {
+        currentWeatherView.setMainWeather(
+            model.weatherByDays[selectedDayIndex][Int(entry.x)],
             location: model.location
         )
     }
     
 }
+

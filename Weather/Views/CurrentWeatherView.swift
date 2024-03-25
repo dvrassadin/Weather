@@ -6,13 +6,19 @@
 //
 
 import UIKit
-import SwiftUI
 
 // MARK: - CurrentWeatherView
 final class CurrentWeatherView: UIView {
     
     // MARK: Properties
     weak var delegate: CurrentWeatherViewDelegate?
+    private var isHorizontalRegular: Bool {
+        window?.windowScene?.screen.traitCollection.horizontalSizeClass == .regular
+    }
+    private var isVerticalRegular: Bool {
+        window?.windowScene?.screen.traitCollection.verticalSizeClass == .regular
+    }
+    private var isLandscape: Bool { UIDevice.current.orientation.isLandscape }
     
     // MARK: UI components
     private let locationPinImageView: UIImageView = {
@@ -25,7 +31,6 @@ final class CurrentWeatherView: UIView {
     private let cityNameLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = UIFont(name: "Inter-Regular_Medium", size: 20)
         label.textColor = .white
         return label
     }()
@@ -56,7 +61,6 @@ final class CurrentWeatherView: UIView {
         searchBar.searchBarStyle = .minimal
         searchBar.searchTextField.textColor = .white
         searchBar.setImage(UIImage(), for: .search, state: .normal)
-        searchBar.searchTextField.font = UIFont(name: "Inter-Regular_Regular", size: 14)
         searchBar.textContentType = .addressCity
         searchBar.isHidden = true
         return searchBar
@@ -65,7 +69,6 @@ final class CurrentWeatherView: UIView {
     private let descriptionLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = UIFont(name: "Inter-Regular_Medium", size: 24)
         label.textColor = .white
         return label
     }()
@@ -80,40 +83,23 @@ final class CurrentWeatherView: UIView {
     private let degreesLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = UIFont(name: "Inter-Regular_Medium", size: 64)
         label.textColor = .white
+        label.textAlignment = .center
         return label
     }()
     
     private let dateLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.font = UIFont(name: "Inter-Regular_Regular", size: 18)
         label.textColor = .white
         return label
     }()
     
-    private let currentWeatherStackView:UIStackView = {
-        let stackView = UIStackView()
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.axis = .vertical
-        stackView.spacing = 3
-        stackView.alignment = .center
-        return stackView
-    }()
+    let forecastCollectionView = ForecastCollectionView()
     
-    let forecastCollectionView: UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
-        layout.scrollDirection = .horizontal
-        
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.showsHorizontalScrollIndicator = false
-        collectionView.backgroundColor = .clear
-        return collectionView
-    }()
+    let chartView = ChartView()
     
-    private let chartView = ChartView()
+    private lazy var detailsView = DetailsView(forecastCollectionView: forecastCollectionView)
     
     // MARK: Lifecycle
     override init(frame: CGRect) {
@@ -122,6 +108,9 @@ final class CurrentWeatherView: UIView {
             ForecastCollectionViewCell.self,
             forCellWithReuseIdentifier: ForecastCollectionViewCell.identifier
         )
+        locationSearchBar.delegate = self
+        chartView.delegate = self
+        setupUI()
     }
     
     required init?(coder: NSCoder) {
@@ -129,15 +118,17 @@ final class CurrentWeatherView: UIView {
     }
     
     override func layoutSubviews() {
-        setupUI()
-        locationSearchBar.delegate = self
+        layoutForSizes()
     }
     
     // MARK: Setup UI
     private func setupUI() {
+        forecastCollectionView.translatesAutoresizingMaskIntoConstraints = false
+        chartView.translatesAutoresizingMaskIntoConstraints = false
+        detailsView.translatesAutoresizingMaskIntoConstraints = false
+        
         backgroundColor = .customBackground1
         addSubviews()
-        setupConstraints()
         chevronButton.addTarget(
             self,
             action: #selector(toggleLocationSearchBar),
@@ -151,58 +142,195 @@ final class CurrentWeatherView: UIView {
         cityStackView.addArrangedSubview(chevronButton)
         addSubview(cityStackView)
         addSubview(locationSearchBar)
-        currentWeatherStackView.addArrangedSubview(descriptionLabel)
-        currentWeatherStackView.addArrangedSubview(weatherIconImageView)
-        currentWeatherStackView.addArrangedSubview(degreesLabel)
-        currentWeatherStackView.addArrangedSubview(dateLabel)
-        addSubview(currentWeatherStackView)
-        addSubview(forecastCollectionView)
+        addSubview(descriptionLabel)
+        addSubview(weatherIconImageView)
+        addSubview(degreesLabel)
+        addSubview(dateLabel)
         addSubview(chartView)
     }
     
-    private func setupConstraints() {
-        chartView.translatesAutoresizingMaskIntoConstraints = false
+    // MARK: Constraints
+    private lazy var sharedConstraints: [NSLayoutConstraint] = [
+        cityStackView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 10),
+        cityStackView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 33),
+        cityStackView.heightAnchor.constraint(equalTo: safeAreaLayoutGuide.heightAnchor, multiplier: 0.03),
         
-        NSLayoutConstraint.activate([
-            cityStackView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 20),
-            cityStackView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 33),
-            cityStackView.heightAnchor.constraint(equalToConstant: 28),
-            
-            locationSearchBar.topAnchor.constraint(equalTo: cityStackView.bottomAnchor, constant: 15),
-            locationSearchBar.centerXAnchor.constraint(equalTo: centerXAnchor),
-            locationSearchBar.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.9),
-            locationSearchBar.heightAnchor.constraint(equalTo: cityStackView.heightAnchor),
-            
-            currentWeatherStackView.topAnchor.constraint(equalTo: locationSearchBar.bottomAnchor, constant: 30),
-            currentWeatherStackView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            
-            weatherIconImageView.widthAnchor.constraint(equalTo: safeAreaLayoutGuide.widthAnchor, multiplier: 0.35),
-            weatherIconImageView.heightAnchor.constraint(equalTo: weatherIconImageView.widthAnchor),
-            
-            forecastCollectionView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            forecastCollectionView.heightAnchor.constraint(greaterThanOrEqualToConstant: 64),
-            forecastCollectionView.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.849),
-            forecastCollectionView.bottomAnchor.constraint(equalTo: chartView.topAnchor, constant: -10),
-            
-            chartView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            chartView.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.888),
-            chartView.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 0.305),
-            chartView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor)
-        ])
+        locationSearchBar.topAnchor.constraint(equalTo: cityStackView.bottomAnchor, constant: 5),
+        locationSearchBar.centerXAnchor.constraint(equalTo: centerXAnchor),
+        locationSearchBar.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.7),
+        locationSearchBar.heightAnchor.constraint(equalTo: safeAreaLayoutGuide.heightAnchor, multiplier: 0.031),
+        
+        descriptionLabel.topAnchor.constraint(greaterThanOrEqualTo: locationSearchBar.bottomAnchor),
+        descriptionLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+        
+        weatherIconImageView.topAnchor.constraint(greaterThanOrEqualTo: descriptionLabel.bottomAnchor, constant: 1),
+        weatherIconImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
+        weatherIconImageView.widthAnchor.constraint(greaterThanOrEqualTo: safeAreaLayoutGuide.widthAnchor, multiplier: 0.31),
+        weatherIconImageView.heightAnchor.constraint(equalTo: weatherIconImageView.widthAnchor),
+        weatherIconImageView.bottomAnchor.constraint(greaterThanOrEqualTo: degreesLabel.topAnchor, constant: -1),
+        
+        degreesLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+        degreesLabel.bottomAnchor.constraint(lessThanOrEqualTo: dateLabel.topAnchor, constant: -5),
+        
+        dateLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+        dateLabel.bottomAnchor.constraint(lessThanOrEqualTo: forecastCollectionView.topAnchor, constant: -15),
+        
+        forecastCollectionView.centerXAnchor.constraint(equalTo: centerXAnchor),
+        forecastCollectionView.heightAnchor.constraint(greaterThanOrEqualToConstant: 64),
+        forecastCollectionView.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.849),
+        forecastCollectionView.bottomAnchor.constraint(lessThanOrEqualTo: chartView.topAnchor, constant: -10),
+        
+        chartView.centerXAnchor.constraint(equalTo: centerXAnchor),
+        chartView.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.888),
+        chartView.heightAnchor.constraint(equalTo: heightAnchor, multiplier: 0.304),
+        chartView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor)
+    ]
+    
+    private lazy var regularConstraints: [NSLayoutConstraint] = [
+        cityStackView.topAnchor.constraint(lessThanOrEqualTo: safeAreaLayoutGuide.topAnchor, constant: 20),
+        cityStackView.leadingAnchor.constraint(equalTo: dateLabel.leadingAnchor),
+        cityStackView.heightAnchor.constraint(equalTo: safeAreaLayoutGuide.heightAnchor, multiplier: 0.031),
+        
+        locationSearchBar.topAnchor.constraint(lessThanOrEqualTo: cityStackView.bottomAnchor, constant: 10),
+        locationSearchBar.leadingAnchor.constraint(equalTo: dateLabel.leadingAnchor),
+        locationSearchBar.widthAnchor.constraint(equalTo: safeAreaLayoutGuide.widthAnchor, multiplier: 0.2),
+        locationSearchBar.heightAnchor.constraint(equalTo: cityStackView.heightAnchor),
+        
+        descriptionLabel.topAnchor.constraint(lessThanOrEqualTo: locationSearchBar.bottomAnchor, constant: 5),
+        descriptionLabel.leadingAnchor.constraint(equalTo: dateLabel.leadingAnchor),
+        
+        degreesLabel.leadingAnchor.constraint(equalTo: dateLabel.leadingAnchor),
+        degreesLabel.bottomAnchor.constraint(lessThanOrEqualTo: dateLabel.topAnchor, constant: -5),
+        
+        dateLabel.leadingAnchor.constraint(lessThanOrEqualTo: safeAreaLayoutGuide.leadingAnchor, constant: 40),
+        dateLabel.bottomAnchor.constraint(lessThanOrEqualTo: chartView.topAnchor, constant: -15),
+        
+        weatherIconImageView.topAnchor.constraint(greaterThanOrEqualTo: safeAreaLayoutGuide.topAnchor, constant: 20),
+        weatherIconImageView.trailingAnchor.constraint(greaterThanOrEqualTo: safeAreaLayoutGuide.trailingAnchor, constant: -30),
+        weatherIconImageView.heightAnchor.constraint(greaterThanOrEqualTo: safeAreaLayoutGuide.heightAnchor, multiplier: 0.334),
+        weatherIconImageView.widthAnchor.constraint(equalTo: weatherIconImageView.heightAnchor),
+        
+        chartView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 20),
+        chartView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -20),
+        chartView.heightAnchor.constraint(equalTo: safeAreaLayoutGuide.heightAnchor, multiplier: 0.559),
+        chartView.widthAnchor.constraint(equalTo: safeAreaLayoutGuide.widthAnchor, multiplier: 0.694444),
+        
+        detailsView.topAnchor.constraint(equalTo: chartView.topAnchor),
+        detailsView.bottomAnchor.constraint(equalTo: chartView.bottomAnchor),
+        detailsView.leadingAnchor.constraint(equalTo: chartView.trailingAnchor, constant: 10),
+        detailsView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: -20)
+    ]
+    
+    private lazy var iPhoneLandscapeConstraints: [NSLayoutConstraint] = [
+        cityStackView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 5),
+        cityStackView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 5),
+        
+        locationSearchBar.topAnchor.constraint(equalTo: cityNameLabel.bottomAnchor, constant: 5),
+        locationSearchBar.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 5),
+        locationSearchBar.trailingAnchor.constraint(equalTo: degreesLabel.leadingAnchor, constant: -5),
+        
+        descriptionLabel.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 5),
+        descriptionLabel.centerYAnchor.constraint(equalTo: degreesLabel.centerYAnchor),
+        
+        dateLabel.leadingAnchor.constraint(equalTo: cityStackView.leadingAnchor),
+        dateLabel.bottomAnchor.constraint(equalTo: chartView.topAnchor, constant: -5),
+        
+        degreesLabel.widthAnchor.constraint(equalTo: chartView.widthAnchor, multiplier: 0.4),
+        degreesLabel.centerYAnchor.constraint(equalTo: weatherIconImageView.centerYAnchor),
+        degreesLabel.trailingAnchor.constraint(equalTo: weatherIconImageView.leadingAnchor, constant: -5),
+        
+        weatherIconImageView.topAnchor.constraint(equalTo: cityStackView.bottomAnchor, constant: 5),
+        weatherIconImageView.widthAnchor.constraint(equalTo: chartView.widthAnchor, multiplier: 0.2),
+        weatherIconImageView.trailingAnchor.constraint(equalTo: detailsView.leadingAnchor, constant: -5),
+        weatherIconImageView.bottomAnchor.constraint(equalTo: chartView.topAnchor, constant: -5),
+        
+        chartView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor, constant: 5),
+        chartView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -5),
+        chartView.heightAnchor.constraint(equalTo: safeAreaLayoutGuide.heightAnchor, multiplier: 0.55),
+        chartView.widthAnchor.constraint(equalTo: safeAreaLayoutGuide.widthAnchor, multiplier: 0.65),
+        
+        detailsView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 5),
+        detailsView.bottomAnchor.constraint(equalTo: chartView.bottomAnchor),
+        detailsView.leadingAnchor.constraint(equalTo: chartView.trailingAnchor, constant: 5),
+        detailsView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor, constant: -5)
+    ]
+    
+    // MARK: Setting up size classes
+    private func layoutForSizes() {
+        if isHorizontalRegular && isVerticalRegular {
+            addSubview(detailsView)
+            if let first = sharedConstraints.first, first.isActive {
+                NSLayoutConstraint.deactivate(sharedConstraints)
+            }
+            if let first = iPhoneLandscapeConstraints.first, first.isActive {
+                NSLayoutConstraint.deactivate(iPhoneLandscapeConstraints)
+            }
+            NSLayoutConstraint.activate(regularConstraints)
+        } else if !isVerticalRegular && isLandscape {
+            addSubview(detailsView)
+            if let first = sharedConstraints.first, first.isActive {
+                NSLayoutConstraint.deactivate(sharedConstraints)
+            }
+            if let first = regularConstraints.first, first.isActive {
+                NSLayoutConstraint.deactivate(regularConstraints)
+            }
+            NSLayoutConstraint.activate(iPhoneLandscapeConstraints)
+        } else {
+            detailsView.removeFromSuperview()
+            forecastCollectionView.removeFromSuperview()
+            addSubview(forecastCollectionView)
+            if let first = regularConstraints.first, first.isActive {
+                NSLayoutConstraint.deactivate(regularConstraints)
+            }
+            if let first = iPhoneLandscapeConstraints.first, first.isActive {
+                NSLayoutConstraint.deactivate(iPhoneLandscapeConstraints)
+            }
+            NSLayoutConstraint.activate(sharedConstraints)
+        }
+        setupFonts()
     }
     
+    private func setupFonts() {
+        degreesLabel.font = UIFont(name: "Inter-Regular_Medium", size: 64)
+        dateLabel.font = UIFont(name: "Inter-Regular", size: 18)
+        
+        if isHorizontalRegular && isVerticalRegular {
+            cityNameLabel.font = UIFont(name: "Inter-Regular_Medium", size: 24)
+            locationSearchBar.searchTextField.font = UIFont(name: "Inter-Regular", size: 22)
+            descriptionLabel.font = UIFont(name: "Inter-Regular_Medium", size: 48)
+            
+        } else {
+            cityNameLabel.font = UIFont(name: "Inter-Regular_Medium", size: 20)
+            locationSearchBar.searchTextField.font = UIFont(name: "Inter-Regular", size: 18)
+            descriptionLabel.font = UIFont(name: "Inter-Regular_Medium", size: 24)
+            
+        }
+    }
+    
+    // MARK: Setting up weather data
     func setWeather(weather: [Weather], location: String) {
         guard let firstWeather = weather.first else { return }
         
-        setMainWeather(firstWeather, location: location)
+        // TODO: Make normal setting up weather details
+        detailsView.setWeather(firstWeather)
         
-        chartView.setChart(weather: weather)
+        // If the date is today, the big weather icon and degrees show information for right now,
+        // if not today, they show information for the hottest time of the day.
+        if Calendar.current.isDateInToday(firstWeather.date) {
+            setMainWeather(firstWeather, location: location)
+        } else if let highestTemperatureForecast = weather.max(by: {
+            $0.temperature < $1.temperature
+        }) {
+            setMainWeather(highestTemperatureForecast, location: location)
+        }
         
         locationSearchBar.fadeOut(withDuration: 0.15)
         locationSearchBar.resignFirstResponder()
+        
+        chartView.setChart(weather: weather)
     }
     
-    private func setMainWeather(_ weather: Weather, location: String) {
+    func setMainWeather(_ weather: Weather, location: String) {
         cityNameLabel.text = location
         descriptionLabel.text = weather.description?.capitalized
         degreesLabel.text = "\(Int(weather.temperature.rounded()))°C"
@@ -210,6 +338,7 @@ final class CurrentWeatherView: UIView {
         let date = weather.date.formatted(.dateTime.day().month().year())
         dateLabel.text = "\(day) | \(date)"
         guard let iconName = weather.iconName else { return }
+        detailsView.setWeather(weather)
         Task(priority: .medium) {
             weatherIconImageView.image = await delegate?.getIcon(name: iconName)
         }
@@ -233,6 +362,7 @@ final class CurrentWeatherView: UIView {
             endEditing(true)
         }
     }
+    
 }
 
 // MARK: - SearchBarDelegate
@@ -242,6 +372,15 @@ extension CurrentWeatherView: UISearchBarDelegate {
         guard let text = searchBar.text else { return }
         delegate?.updateLocation(text)
         searchBar.text = nil
+    }
+    
+}
+
+// MARK: - ChartViewDelegate
+extension CurrentWeatherView: WeatherChartViewDelegate {
+    
+    func getIcon(name: String) async -> UIImage? {
+        await delegate?.getIcon(name: name)
     }
     
 }

@@ -1,5 +1,5 @@
 //
-//  IntValueFormatter.swift
+//  DegreesValueFormatter.swift
 //  Weather
 //
 //  Created by Daniil Rassadin on 19/3/24.
@@ -7,7 +7,7 @@
 
 import DGCharts
 
-final class IntValueFormatter: ValueFormatter {
+final class DegreesValueFormatter: ValueFormatter {
     
     func stringForValue(
         _ value: Double,
@@ -15,7 +15,6 @@ final class IntValueFormatter: ValueFormatter {
         dataSetIndex: Int,
         viewPortHandler: DGCharts.ViewPortHandler?
     ) -> String {
-        String(Int(value.rounded()))
+        "\(Int(value.rounded()))°"
     }
-    
 }

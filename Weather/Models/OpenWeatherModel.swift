@@ -54,9 +54,12 @@ final class OpenWeatherModel: WeatherModelProtocol {
             longitude: coordinate.longitude
         )
         
-        weatherByDays = Dictionary(grouping: weather) {$0.date.formatted(.dateTime.day()) }
-            .sorted { $0.key < $1.key }
-            .map { $0.value }
+        // Creating 2D array
+        weatherByDays = Dictionary(grouping: weather) {
+            $0.date.formatted(.dateTime.dayOfYear())
+        }
+        .sorted { $0.key < $1.key }
+        .map { $0.value }
         
         self.location = name
     }
