@@ -20,6 +20,12 @@ final class DetailsView: UIView {
     // MARK: UI components
     private let forecastCollectionView: ForecastCollectionView
     
+    private let backgroundImageView: UIImageView = {
+        let imageView = UIImageView(image: .detailsBackground)
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+    
     private let clockImageView: UIImageView = {
         let imageView = UIImageView(
             image: UIImage(
@@ -108,6 +114,7 @@ final class DetailsView: UIView {
     
     private func addSubviews() {
         forecastCollectionView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(backgroundImageView)
         addSubview(forecastCollectionView)
         timeTextStackView.addArrangedSubview(clockImageView)
         timeTextStackView.addArrangedSubview(timeTextLabel)
@@ -122,6 +129,11 @@ final class DetailsView: UIView {
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
+            backgroundImageView.topAnchor.constraint(equalTo: centerYAnchor),
+            backgroundImageView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            backgroundImageView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            backgroundImageView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            
             forecastCollectionView.topAnchor.constraint(equalTo: topAnchor, constant: 10),
             forecastCollectionView.leadingAnchor.constraint(equalTo: leadingAnchor),
             forecastCollectionView.trailingAnchor.constraint(equalTo: trailingAnchor),
