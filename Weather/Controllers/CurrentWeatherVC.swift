@@ -55,15 +55,41 @@ final class CurrentWeatherVC: UIViewController {
                     animated: true,
                     scrollPosition: .centeredHorizontally
                 )
+            } catch APIError.invalidLocation {
+                showAlert(
+                    title: String(localized: "Location Error"),
+                    message: String(localized: "It was not possible to find such a location. Try entering a different location, or in a different language, or in a different way.")
+                )
             } catch {
                 print(error)
+                showAlert(
+                    title: String(localized: "Connection Error"),
+                    message: String(localized: "The weather could not be loaded.")) { _ in
+                        self.updateWeather(locationName: self.model.location)
+                    }
             }
         }
     }
     
-    // TODO: Create alert
-    private func showAlert(title: String, text: String) {
+    private func showAlert(title: String, message: String, tryAgainHandler: ((UIAlertAction) -> ())? = nil) {
+        let alertController = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: .alert
+        )
         
+        alertController.addAction(UIAlertAction(title: "OK", style: .default))
+        if let tryAgainHandler {
+            alertController.addAction(
+                UIAlertAction(
+                    title: String(localized: "Try Again"),
+                    style: .default,
+                    handler: tryAgainHandler
+                )
+            )
+        }
+        
+        present(alertController, animated: true)
     }
     
 }

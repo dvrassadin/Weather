@@ -17,4 +17,5 @@ final class DegreesValueFormatter: ValueFormatter {
     ) -> String {
         "\(Int(value.rounded()))°"
     }
+    
 }

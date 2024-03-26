@@ -42,13 +42,12 @@ final class OpenWeatherModel: WeatherModelProtocol {
     
     // MARK: Updating data
     func updateWeather(location: String) async throws {
-        let placemark = try await geocoder.geocodeAddressString(location)
-        
-        guard let placemark = placemark.first,
+        guard let placemarks = try? await geocoder.geocodeAddressString(location),
+              let placemark = placemarks.first,
               let name = placemark.name,
               let coordinate = placemark.location?.coordinate
         else { throw APIError.invalidLocation }
-        
+
         let weather = try await networkService.requestForecast(
             latitude: coordinate.latitude,
             longitude: coordinate.longitude
