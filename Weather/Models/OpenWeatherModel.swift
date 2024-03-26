@@ -41,12 +41,17 @@ final class OpenWeatherModel: WeatherModelProtocol {
     }
     
     // MARK: Updating data
-    func updateWeather(location: String) async throws {
-        guard let placemarks = try? await geocoder.geocodeAddressString(location),
-              let placemark = placemarks.first,
+    private func getCoordinates(location: String) async throws -> CLLocationCoordinate2D {
+        guard let placemark = try? await geocoder.geocodeAddressString(location).first,
               let name = placemark.name,
               let coordinate = placemark.location?.coordinate
         else { throw APIError.invalidLocation }
+        
+        self.location = name
+        return coordinate
+    }
+    func updateWeather(location: String) async throws {
+        let coordinate = try await getCoordinates(location: location)
 
         let weather = try await networkService.requestForecast(
             latitude: coordinate.latitude,
@@ -59,8 +64,6 @@ final class OpenWeatherModel: WeatherModelProtocol {
         }
         .sorted { $0.key < $1.key }
         .map { $0.value }
-        
-        self.location = name
     }
     
     func getWeatherIcon(name: String) async -> UIImage? {
