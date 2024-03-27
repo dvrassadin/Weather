@@ -22,4 +22,4 @@ You need a free OpenWeather API key. It is used in class ```OpenWeatherNetworkSe
 
 ### iPhone
 ![iPhoneLandscape](https://github.com/dvrassadin/Weather/assets/104829078/3c0b497e-ebc9-4e48-8f28-d75f55420f58)
-![iPhonePortrait](https://github.com/dvrassadin/Weather/assets/104829078/00b009ee-957f-436b-8a6c-2113d68d5f3e)
+<img src="https://github.com/dvrassadin/Weather/assets/104829078/00b009ee-957f-436b-8a6c-2113d68d5f3e" alt="iPhonePortrait" height=800>
